@@ -1,8 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-// Gemini API 초기화 (서버 환경변수에서만 접근)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+import { hasAIKey, chatWithHistory, chatWithImage } from './lib/ai-client';
 
 // 유효한 분석 모드 목록
 const VALID_MODES = ['face', 'zodiac', 'mbti', 'saju', 'blood', 'couple', 'integrated', 'unified'];
@@ -75,66 +72,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 시스템 프롬프트 구성 (Q&A 모드 시 soulChart 전달)
     const systemPrompt = buildSystemPrompt(mode, profile, soulChart);
 
-    // systemInstruction으로 시스템 프롬프트 전달 (매 메시지마다 반복 전송하지 않음)
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction: systemPrompt,
-    });
-
     // 슬라이딩 윈도우 적용 (unified는 더 긴 대화 → 10턴)
     const maxTurns = mode === 'unified' ? 10 : 5;
     const recentHistory = getRecentHistory(history || [], maxTurns);
 
-    // Gemini API 요구사항: 히스토리는 user로 시작하고, user/model이 번갈아 나와야 함
+    // 히스토리 포맷팅 (연속된 같은 role 병합)
     const rawHistory = recentHistory.map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }],
+      role: (msg.role === 'user' ? 'user' : 'model') as 'user' | 'model',
+      text: msg.text,
     }));
 
-    // 히스토리가 model로 시작하면 앞에 합성 user 메시지 추가
     if (rawHistory.length > 0 && rawHistory[0].role === 'model') {
-      rawHistory.unshift({
-        role: 'user',
-        parts: [{ text: '상담을 시작합니다.' }],
-      });
+      rawHistory.unshift({ role: 'user' as const, text: '상담을 시작합니다.' });
     }
 
-    // 연속된 같은 role 메시지 병합 (Gemini API는 교대 필수)
-    const formattedHistory: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+    const formattedHistory: Array<{ role: 'user' | 'model'; text: string }> = [];
     for (const msg of rawHistory) {
       if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === msg.role) {
-        // 같은 role이면 텍스트를 이전 메시지에 합침
-        formattedHistory[formattedHistory.length - 1].parts[0].text += '\n\n' + msg.parts[0].text;
+        formattedHistory[formattedHistory.length - 1].text += '\n\n' + msg.text;
       } else {
-        formattedHistory.push(msg);
+        formattedHistory.push({ role: msg.role, text: msg.text });
       }
     }
 
-    // Gemini API 호출
-    const chat = model.startChat({
-      history: formattedHistory,
-    });
+    // AI 호출 (Groq 우선, Gemini 폴백)
+    let text: string;
 
-    // face 모드 첫 메시지: 실제 얼굴 이미지를 Gemini에 전달
-    let messageContent: any = message;
+    // face 모드 첫 메시지: 얼굴 이미지 포함
     if (mode === 'face' && profile?.faceImage && formattedHistory.length === 0) {
-      const imageData = profile.faceImage.includes(',')
-        ? profile.faceImage.split(',')[1]
-        : profile.faceImage;
-      messageContent = [
-        message,
-        {
-          inlineData: {
-            data: imageData,
-            mimeType: 'image/jpeg',
-          },
-        },
-      ];
+      text = await chatWithImage({
+        systemPrompt,
+        userMessage: message,
+        imageBase64: profile.faceImage,
+      });
+    } else {
+      text = await chatWithHistory({
+        systemPrompt,
+        history: formattedHistory,
+        userMessage: message,
+      });
     }
-
-    const result = await chat.sendMessage(messageContent);
-    const response = await result.response;
-    const text = response.text();
 
     // DEPTH 태그 파싱 (Q&A 모드에서는 DEPTH 불필요)
     const isQnAMode = mode === 'integrated' && soulChart;
@@ -147,7 +124,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       depth,
     });
   } catch (error: any) {
-    console.error('Gemini API Error:', error);
+    console.error('AI API Error:', error);
 
     // 에러 코드별 분기
     if (error.message?.includes('quota')) {

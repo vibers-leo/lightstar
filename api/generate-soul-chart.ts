@@ -1,7 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+import { generateText } from './lib/ai-client';
 
 /**
  * 5개 개별 분석 결과를 종합하여 영혼 차트를 생성
@@ -110,10 +108,7 @@ ${analysisTexts}
 - lifeAdvice는 도사 페르소나로 깊이 있게 작성하세요
 `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await generateText({ prompt, maxTokens: 2048 });
 
     // JSON 파싱
     const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);
@@ -226,10 +221,7 @@ ${conversationText}
 \`\`\`
 `;
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
+  const text = await generateText({ prompt, maxTokens: 2048 });
 
   const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {

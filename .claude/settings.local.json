@@ -17,7 +17,15 @@
       "Bash(git add:*)",
       "Bash(git branch:*)",
       "Bash(git remote add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(npx vercel:*)",
+      "Bash(git reset:*)",
+      "Bash(c:/Users/고향의봄길/Desktop/lightstar/api/analyze-face.ts:*)",
+      "WebFetch(domain:my-soul-chart.vercel.app)",
+      "Bash(npx create-expo-app@latest:*)",
+      "Bash(yes:*)"
     ]
   }
 }

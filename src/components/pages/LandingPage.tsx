@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 
 interface LandingPageProps {
   onSelectProduct: (productId: string) => void;
+  onZodiacFortune?: () => void;
 }
 
 // 5가지 분석 영역 아이콘 + 라벨
@@ -17,7 +18,7 @@ const ANALYSIS_AREAS = [
   { icon: Droplet, label: '혈액형', color: '#5eead4' },
 ];
 
-export default function LandingPage({ onSelectProduct }: LandingPageProps) {
+export default function LandingPage({ onSelectProduct, onZodiacFortune }: LandingPageProps) {
   const [showBanner, setShowBanner] = useState(() => {
     return localStorage.getItem('promoBannerDismissed') !== 'true';
   });
@@ -117,6 +118,28 @@ export default function LandingPage({ onSelectProduct }: LandingPageProps) {
           하나의 상담에서 5가지 영역을 통합 분석
         </p>
       </div>
+
+      {/* 별자리 운세 빠른 진입 카드 */}
+      {onZodiacFortune && (
+        <div className="max-w-md mx-auto mb-10 px-4">
+          <motion.button
+            onClick={onZodiacFortune}
+            className="w-full rounded-2xl p-5 text-left flex items-center gap-4 hover:scale-[1.02] transition-transform"
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed20, #2563eb20)',
+              border: '1px solid #7c3aed40',
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="text-4xl">⭐</div>
+            <div className="flex-1">
+              <p className="font-bold text-white text-base">오늘의 별자리 운세</p>
+              <p className="text-starlight-400/70 text-sm mt-0.5">생년월일 입력 → 무료 운세 확인</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-starlight-400/50" />
+          </motion.button>
+        </div>
+      )}
 
       {/* 개별 분석 카드 (축소) */}
       <div className="max-w-7xl mx-auto mt-12">

@@ -4,7 +4,7 @@ import { db } from '../lib/firebase-admin';
 interface UsageData {
   messageCount: number;
   monthlyLimit: number;
-  resetDate: Date;
+  resetDate: any; // Firestore Timestamp or Date
 }
 
 /**

@@ -1,3 +1,21 @@
+## 전략 문서 (개발 전 반드시 숙지)
+- **전략 진단 리포트**: `data/STRATEGY_ANALYSIS.md`
+- **PM 공통 지침**: 맥미니 루트 `pm.md`
+
+### 전략 핵심 요약
+- AI 기반 통합 분석이 경쟁사 대비 차별화 핵심 (사주+관상+MBTI+혈액형)
+- 온보딩 → 세션 시간 15분 달성 → 재방문율 40% 달성이 3단계 성장 경로
+- SNS 공유 기능이 바이럴 성장의 열쇠 (공유 시 10-20% 바이럴 계수)
+- 프리미엄 구독(Pro 9,900원)으로 월 수익 최소 495만원 달성 가능
+- Phase 2에서 마케팅(SEO/SNS) 집중 필요, 사용자 발견이 최대 과제
+
+### 빌더 공통 지침
+- **gstack 빌더 철학**: 맥미니 루트 `gstack.md` — Boil the Lake, Search Before Building, 스프린트 프로세스
+- **개발 프로세스**: Think → Plan → Build → Review → Test → Ship → Reflect
+- **핵심 규칙**: 테스트 동시 작성, 새 패턴 도입 전 검색, 압축률 기반 추정
+
+---
+
 # 바이브 철학관 (Vibe Philosophy Agent 3.0)
 
 ## 프로젝트 개요
@@ -167,3 +185,70 @@ npm run dev                    # Vite가 /api를 localhost:3001로 프록시
 - GA4, Rate Limiting 고도화, 성능 최적화, SEO
 
 **상세 로드맵은 OKR.md 참조**
+
+---
+
+## 개발 규칙
+
+### 코드 스타일
+- TypeScript strict mode 사용
+- 한글 우선: 모든 UI 텍스트와 주석은 한국어
+- 시맨틱 라인 브레이크: 긴 텍스트는 의미 단위로 줄바꿈
+
+### Git 규칙
+- 커밋 메시지: 한글 (feat:, fix:, refactor:, chore: 접두사)
+- .env 파일 절대 커밋 금지
+- `git add .` 사용 금지 → 특정 파일만 add
+
+### 디자인 준수
+- 디자인 가이드: `DESIGN_GUIDE.md` 참조
+- 반응형: md (768px) 브레이크포인트 기준
+- 접근성: lang="ko" 유지, word-break: keep-all
+
+### AI Recipe 이미지 API
+
+이 프로젝트는 **AI Recipe 중앙 이미지 서비스**를 사용합니다.
+Vite 앱이므로 클라이언트가 아닌 `api/lib/` 서버 코드에서 사용합니다.
+
+#### 사용 가능한 함수
+
+```typescript
+import { searchStockImage, generateAIImage } from './lib/ai-recipe-client';
+```
+
+#### Stock Image 검색
+```typescript
+const image = await searchStockImage('mystical fortune telling', {
+  orientation: 'squarish',
+  size: 'medium',
+});
+```
+
+#### AI 이미지 생성
+```typescript
+const image = await generateAIImage('mystical tarot card design, korean traditional aesthetic, fortune telling', {
+  size: 'medium',
+  provider: 'auto',
+});
+```
+
+#### 주요 용도
+- 운세 결과 카드 이미지
+- 사주/관상 시각 자료
+- 공유용 결과 이미지
+
+#### 주의사항
+- `api/` 서버리스 함수에서만 사용 (API 키 보호)
+- Rate Limit: 1000회/일
+- AI Recipe 서버 실행 필요: http://localhost:3300
+
+### 상위 브랜드
+- 회사: 계발자들 (Vibers)
+- 도메인: vibers.co.kr
+
+
+## 세션로그 기록 (필수)
+- 모든 개발 대화의 주요 내용을 `session-logs/` 폴더에 기록할 것
+- 파일명: `YYYY-MM-DD_한글제목.md` / 내용: 한글
+- 세션 종료 시, 마일스톤 달성 시, **컨텍스트 압축 전**에 반드시 저장
+- 상세 포맷은 상위 CLAUDE.md 참조

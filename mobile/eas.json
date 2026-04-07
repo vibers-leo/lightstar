@@ -22,6 +22,9 @@
     },
     "production": {
       "autoIncrement": true,
+      "ios": {
+        "autoIncrement": "buildNumber"
+      },
       "android": {
         "buildType": "app-bundle"
       }
@@ -32,11 +35,6 @@
       "android": {
         "serviceAccountKeyPath": "./google-services.json",
         "track": "internal"
-      },
-      "ios": {
-        "appleId": "",
-        "ascAppId": "",
-        "appleTeamId": ""
       }
     }
   }

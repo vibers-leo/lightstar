@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  FlatList, Dimensions, Animated,
+  FlatList, Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useProfile } from '../hooks/useProfile';
 
 const { width } = Dimensions.get('window');
 
@@ -44,20 +45,32 @@ const SLIDES: Slide[] = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { completeOnboarding } = useProfile();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
+  const getItemLayout = (_: any, index: number) => ({
+    length: width,
+    offset: width * index,
+    index,
+  });
+
+  const finishOnboarding = async () => {
+    await completeOnboarding();
+    router.replace('/');
+  };
+
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
       setCurrentIndex(currentIndex + 1);
     } else {
-      router.replace('/');
+      finishOnboarding();
     }
   };
 
   const handleSkip = () => {
-    router.replace('/');
+    finishOnboarding();
   };
 
   const renderSlide = ({ item }: { item: Slide }) => (
@@ -94,8 +107,14 @@ export default function OnboardingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        getItemLayout={getItemLayout}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+        onScrollToIndexFailed={(info) => {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+          }, 100);
+        }}
       />
 
       {/* 페이지 인디케이터 */}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import ChatInterface from '../components/chat/ChatInterface';
 import LandingPage from '../components/pages/LandingPage';
+import ZodiacFortunePage from '../components/pages/ZodiacFortunePage';
 import ConversationalForm from '../components/forms/ConversationalForm';
 import ProductFormSidebar from '../components/sidebars/ProductFormSidebar';
 import Toast from '../components/ui/Toast';
@@ -655,6 +656,20 @@ const App: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Route: Zodiac Fortune */}
+            {currentRoute.path === 'zodiac-fortune' && (
+              <motion.div
+                key="zodiac-fortune"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="w-full h-full overflow-y-auto bg-white"
+              >
+                <ZodiacFortunePage onBack={() => navigate({ path: 'home' })} />
+              </motion.div>
+            )}
+
             {/* Route: Home (랜딩페이지) */}
             {currentRoute.path === 'home' && (
               <motion.div
@@ -665,7 +680,10 @@ const App: React.FC = () => {
                 transition={{ duration: 0.2 }}
                 className="w-full h-full overflow-y-auto"
               >
-                <LandingPage onSelectProduct={handleSelectProduct} />
+                <LandingPage
+                  onSelectProduct={handleSelectProduct}
+                  onZodiacFortune={() => navigate({ path: 'zodiac-fortune' })}
+                />
               </motion.div>
             )}
           </AnimatePresence>

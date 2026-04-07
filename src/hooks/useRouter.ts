@@ -5,7 +5,8 @@ export type Route =
   | { path: 'home' }
   | { path: 'chart' }
   | { path: 'chat'; mode: string }
-  | { path: 'view'; permissionId: string };
+  | { path: 'view'; permissionId: string }
+  | { path: 'zodiac-fortune' };
 
 export function useRouter() {
   const [currentRoute, setCurrentRoute] = useState<Route>(parseHash());
@@ -28,6 +29,8 @@ export function useRouter() {
       hash = `#/chat/${route.mode}`;
     } else if (route.path === 'view') {
       hash = `#/view/${route.permissionId}`;
+    } else if (route.path === 'zodiac-fortune') {
+      hash = '#/zodiac-fortune';
     }
 
     window.location.hash = hash;
@@ -55,6 +58,10 @@ function parseHash(): Route {
 
   if (parts[0] === 'view' && parts[1]) {
     return { path: 'view', permissionId: parts[1] };
+  }
+
+  if (parts[0] === 'zodiac-fortune') {
+    return { path: 'zodiac-fortune' };
   }
 
   return { path: 'home' };

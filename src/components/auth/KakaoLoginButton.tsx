@@ -43,6 +43,13 @@ export default function KakaoLoginButton() {
         nickname: user.nickname,
         profileImage: user.profileImage,
       });
+
+      // vibers-sync: lightstar 카카오 로그인 사용자를 vibers.brand_members에 등록
+      fetch(`${import.meta.env.VITE_VIBERS_SITE_URL ?? 'https://vibers.co.kr'}/api/vibers/connect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-vibers-secret': import.meta.env.VITE_VIBERS_CONNECT_SECRET ?? '' },
+        body: JSON.stringify({ type: 'join', brandSlug: 'lightstar', userEmail: user.email ?? '', userName: user.nickname ?? null }),
+      }).catch(() => {});
     } catch (error) {
       console.error('카카오 로그인 에러:', error);
       showToast('error', '카카오 로그인에 실패했습니다');

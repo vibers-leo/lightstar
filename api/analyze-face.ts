@@ -1,9 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-// Gemini API 초기화 (Vision 모델)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+import { hasAIKey, analyzeImage } from './lib/ai-client';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS 설정
@@ -96,18 +92,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 `;
 
-    const imageParts = [
-      {
-        inlineData: {
-          data: imageBase64.split(',')[1] || imageBase64,
-          mimeType: 'image/jpeg',
-        },
-      },
-    ];
+    if (!hasAIKey()) {
+      return res.status(500).json({ error: 'AI 서비스가 현재 사용 불가합니다.' });
+    }
 
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = await result.response;
-    const text = response.text();
+    const text = await analyzeImage({
+      prompt,
+      imageBase64,
+      mimeType: 'image/jpeg',
+    });
 
     // JSON 파싱
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -129,7 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ features });
   } catch (error: any) {
-    console.error('Gemini Vision API Error:', error);
+    console.error('Vision API Error:', error);
 
     if (error.message?.includes('SAFETY')) {
       return res.status(400).json({

@@ -1,7 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+import { generateText } from './lib/ai-client';
 
 /**
  * 대화 히스토리를 분석하여 결과 카드 데이터 생성
@@ -75,10 +73,7 @@ ${conversationText}
 - 도사 페르소나를 유지하되, 카드에 어울리는 고급스러운 표현 사용
 `;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await generateText({ prompt, maxTokens: 1024 });
 
     // JSON 파싱
     const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);

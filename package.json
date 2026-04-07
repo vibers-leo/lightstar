@@ -9,13 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@astrodraw/astrochart": "^3.0.2",
     "@google/genai": "^1.38.0",
     "@google/generative-ai": "^0.24.1",
     "@vercel/analytics": "^1.6.1",
+    "astronomia": "^4.2.0",
     "clsx": "^2.1.1",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.1",
     "framer-motion": "^12.34.0",
+    "groq-sdk": "^1.1.1",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.563.0",
     "react": "^19.2.3",
