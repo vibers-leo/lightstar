@@ -16,8 +16,8 @@ RUN npm run build
 RUN npx esbuild server.ts \
       --bundle \
       --platform=node \
-      --format=esm \
-      --outfile=dist/server.js \
+      --format=cjs \
+      --outfile=dist/server.cjs \
       --external:sharp \
       --external:fsevents \
       --loader:.ts=ts
@@ -31,4 +31,4 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/server.cjs"]
