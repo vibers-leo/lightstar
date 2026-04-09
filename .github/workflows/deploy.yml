@@ -1,0 +1,33 @@
+name: Deploy to NCP
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t lightstar-app:latest .
+
+      - name: Save and transfer image
+        run: |
+          docker save lightstar-app:latest | gzip > lightstar-app.tar.gz
+          scp -o StrictHostKeyChecking=no lightstar-app.tar.gz ${{ secrets.NCP_USER }}@${{ secrets.NCP_HOST }}:/root/projects/lightstar/
+
+      - name: Deploy on NCP
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.NCP_HOST }}
+          username: ${{ secrets.NCP_USER }}
+          key: ${{ secrets.NCP_SSH_KEY }}
+          script: |
+            cd /root/projects/lightstar
+            docker load < lightstar-app.tar.gz
+            docker compose down
+            docker compose up -d
+            docker exec npm-app-1 nginx -s reload || true
+            rm lightstar-app.tar.gz

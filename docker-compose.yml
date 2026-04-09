@@ -1,0 +1,15 @@
+services:
+  lightstar-app:
+    image: lightstar-app:latest
+    container_name: lightstar-app
+    restart: unless-stopped
+    ports:
+      - "4122:3000"
+    env_file:
+      - .env
+    networks:
+      - npm_default
+
+networks:
+  npm_default:
+    external: true
