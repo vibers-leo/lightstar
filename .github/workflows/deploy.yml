@@ -23,7 +23,7 @@ jobs:
       - name: Save and transfer image
         run: |
           docker save lightstar-app:latest | gzip > lightstar-app.tar.gz
-          scp lightstar-app.tar.gz ${{ secrets.NCP_USER }}@${{ secrets.NCP_HOST }}:/root/projects/lightstar/
+          scp lightstar-app.tar.gz docker-compose.yml ${{ secrets.NCP_USER }}@${{ secrets.NCP_HOST }}:/root/projects/lightstar/
 
       - name: Deploy on NCP
         uses: appleboy/ssh-action@v1
