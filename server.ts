@@ -31,7 +31,7 @@ for (const route of apiRoutes) {
 
 // Static files
 app.use(express.static(DIST));
-app.get('*', (_req, res) => {
+app.get('/{*path}', (_req, res) => {
   res.sendFile(path.join(DIST, 'index.html'));
 });
 
