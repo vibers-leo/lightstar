@@ -1,5 +1,5 @@
-FROM node:20-alpine AS base
-RUN apk add --no-cache python3 make g++
+FROM node:20-slim AS base
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 WORKDIR /app
